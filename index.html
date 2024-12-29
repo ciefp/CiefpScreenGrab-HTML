@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ciefp Enigma2 Screenshot</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      height: 100vh;
+    }
+    .sidebar {
+      width: 25%;
+      background-color: #006400; /* Tamno zelena boja za levu stranu */
+      padding: 20px;
+      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .content {
+      width: 75%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #90EE90; /* Svetlo zelena pozadinska boja za desnu stranu */
+    }
+    input, button {
+      padding: 10px;
+      margin: 5px 0;
+      width: 100%;
+      box-sizing: border-box;
+      font-size: 14px;
+    }
+    button {
+      cursor: pointer;
+    }
+    img {
+      max-width: 100%;
+      max-height: 100%;
+      border: 1px solid #ddd;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+    h2 {
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <h2>.::CiefpScreenGrab::.</h2>
+    <input type="text" id="ip" placeholder="IP Address (e.g., 192.168.1.25)">
+    <input type="text" id="username" placeholder="Username (e.g., root)">
+    <input type="password" id="password" placeholder="Password">
+    <button id="connect">Connect</button>
+    <button id="grab" disabled>Grab Screenshot</button>
+    <button id="save" disabled>Save Screenshot</button>
+  </div>
+  <div class="content">
+    <img id="screenshot" src="https://i.postimg.cc/m2Z90vhZ/imageciefp.png">
+  </div>
+
+  <script>
+    // Load saved settings if available
+    window.onload = () => {
+      const savedIp = localStorage.getItem('ip');
+      const savedUsername = localStorage.getItem('username');
+      const savedPassword = localStorage.getItem('password');
+
+      if (savedIp) document.getElementById('ip').value = savedIp;
+      if (savedUsername) document.getElementById('username').value = savedUsername;
+      if (savedPassword) document.getElementById('password').value = savedPassword;
+    };
+
+    let ip, username, password;
+
+    document.getElementById('connect').addEventListener('click', () => {
+      ip = document.getElementById('ip').value.trim();
+      username = document.getElementById('username').value.trim();
+      password = document.getElementById('password').value.trim();
+
+      if (!ip || !username || !password) {
+        alert('Please fill in all fields');
+        return;
+      }
+
+      // Save the settings to localStorage
+      localStorage.setItem('ip', ip);
+      localStorage.setItem('username', username);
+      localStorage.setItem('password', password);
+
+      alert(`Connected to ${ip}`);
+      document.getElementById('grab').disabled = false;
+    });
+
+    document.getElementById('grab').addEventListener('click', () => {
+      if (!ip) {
+        alert('You must connect first!');
+        return;
+      }
+
+      const timestamp = Date.now();
+      const url = `http://${username}:${password}@${ip}/grab?format=jpg&mode=all&t=${timestamp}`;
+      
+      const imgElement = document.getElementById('screenshot');
+      imgElement.src = url;
+      imgElement.alt = 'Loading screenshot...';
+
+      document.getElementById('save').disabled = false;
+    });
+
+    document.getElementById('save').addEventListener('click', () => {
+      const imgElement = document.getElementById('screenshot');
+      if (!imgElement.src) {
+        alert('No screenshot to save!');
+        return;
+      }
+
+      const link = document.createElement('a');
+      link.href = imgElement.src;
+      link.download = `screenshot-${Date.now()}.jpg`;
+      link.click();
+    });
+  </script>
+</body>
+</html>
